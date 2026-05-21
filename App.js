@@ -51,7 +51,6 @@ export default function App() {
   const [blockedChats, setBlockedChats] = useState(new Set());
   const [typingChats, setTypingChats] = useState(new Set());
   const [showMenu, setShowMenu] = useState(false);
-
   const flatListRef = useRef(null);
   const replyTimeouts = useRef({});
 
@@ -59,7 +58,9 @@ export default function App() {
   const currentMessages = activeChat ? messagesByChat[activeChat.id] || [] : [];
   const visibleConversations = conversations.filter(c => !blockedChats.has(c.id));
 
-  const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  const generateId = () =>
+    `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
   const closeMenu = () => setShowMenu(false);
 
   useEffect(() => {
@@ -149,16 +150,22 @@ export default function App() {
 
   const deleteChat = (chatId) => {
     setSelectedChatId(null);
+
     if (replyTimeouts.current[chatId]) {
       clearTimeout(replyTimeouts.current[chatId]);
       delete replyTimeouts.current[chatId];
     }
+
     setTypingChats(prev => {
       const updated = new Set(prev);
       updated.delete(chatId);
       return updated;
     });
-    setConversations(prev => prev.filter(c => c.id !== chatId));
+
+    setConversations(prev =>
+      prev.filter(c => c.id !== chatId)
+    );
+
     setMessagesByChat(prev => {
       const updated = { ...prev };
       delete updated[chatId];
@@ -168,21 +175,28 @@ export default function App() {
 
   const blockChat = (chatId) => {
     setSelectedChatId(null);
+
     if (replyTimeouts.current[chatId]) {
       clearTimeout(replyTimeouts.current[chatId]);
       delete replyTimeouts.current[chatId];
     }
+
     setTypingChats(prev => {
       const updated = new Set(prev);
       updated.delete(chatId);
       return updated;
     });
+
     setBlockedChats(prev => {
       const updated = new Set(prev);
       updated.add(chatId);
       return updated;
     });
-    setConversations(prev => prev.filter(c => c.id !== chatId));
+
+    setConversations(prev =>
+      prev.filter(c => c.id !== chatId)
+    );
+
     setMessagesByChat(prev => {
       const updated = { ...prev };
       delete updated[chatId];
@@ -192,35 +206,39 @@ export default function App() {
 
   const handleMenuOption = (option) => {
     setShowMenu(false);
+
     if (!activeChat) return;
+
     const chatId = activeChat.id;
 
     switch (option) {
       case 'profile':
+        setShowMenu(false);
         setProfileChat(activeChat);
         return;
       case 'mute':
         setMutedChats(prev => {
           const updated = new Set(prev);
+
           if (updated.has(chatId)) {
             updated.delete(chatId);
           } else {
             updated.add(chatId);
           }
+
           return updated;
         });
         break;
+
       case 'delete':
-        Alert.alert('Delete Chat', 'Are you sure?', [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', onPress: () => deleteChat(chatId), style: 'destructive' },
-        ]);
+        deleteChat(chatId);
         break;
+
       case 'block':
-        Alert.alert('Block User', 'Block this contact?', [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Block', onPress: () => blockChat(chatId), style: 'destructive' },
-        ]);
+        blockChat(chatId);
+        break;
+
+      default:
         break;
     }
   };
@@ -228,25 +246,40 @@ export default function App() {
   if (profileChat) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" />
         <View style={styles.profileContainer}>
-          <TouchableOpacity onPress={() => setProfileChat(null)} style={styles.profileBack}>
+          <TouchableOpacity
+            onPress={() => setProfileChat(null)}
+            style={styles.profileBack}
+          >
             <Text style={styles.backButton}>←</Text>
           </TouchableOpacity>
+
           <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>{profileChat.name.charAt(0)}</Text>
+            <Text style={styles.profileAvatarText}>
+              {profileChat.name.charAt(0)}
+            </Text>
           </View>
-          <Text style={styles.profileName}>{profileChat.name}</Text>
+
+          <Text style={styles.profileName}>
+            {profileChat.name}
+          </Text>
+
           <Text style={styles.profileStatus}>
             {profileChat.online ? 'Stable Connection' : 'Offline'}
           </Text>
+
           <View style={styles.profileCard}>
             <Text style={styles.profileLabel}>STATUS</Text>
-            <Text style={styles.profileValue}>Secure communication active</Text>
+            <Text style={styles.profileValue}>
+              Secure communication active
+            </Text>
           </View>
+
           <View style={styles.profileCard}>
             <Text style={styles.profileLabel}>DEVICE</Text>
-            <Text style={styles.profileValue}>VYBE Mobile Node</Text>
+            <Text style={styles.profileValue}>
+              VYBE Mobile Node
+            </Text>
           </View>
         </View>
       </SafeAreaView>
@@ -256,14 +289,17 @@ export default function App() {
   if (selectedChatId && activeChat) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <TouchableWithoutFeedback onPress={closeMenu}>
             <View style={{ flex: 1 }}>
               <View style={styles.chatHeader}>
                 <TouchableOpacity onPress={() => setSelectedChatId(null)}>
                   <Text style={styles.backButton}>←</Text>
                 </TouchableOpacity>
+
                 <View style={styles.chatProfile}>
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{activeChat.name.charAt(0)}</Text>
@@ -275,6 +311,7 @@ export default function App() {
                     </Text>
                   </View>
                 </View>
+
                 <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
                   <Text style={styles.menu}>⋮</Text>
                 </TouchableOpacity>
@@ -287,14 +324,14 @@ export default function App() {
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('mute')}>
                     <Text style={styles.menuItemText}>
-                      {mutedChats.has(activeChat.id) ? 'Unmute' : 'Mute'}
+                      {mutedChats.has(activeChat.id) ? 'Unmute Chat' : 'Mute Chat'}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('delete')}>
-                    <Text style={styles.menuItemText}>Delete</Text>
+                    <Text style={styles.menuItemText}>Delete Chat</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.menuItem} onPress={() => handleMenuOption('block')}>
-                    <Text style={styles.menuItemText}>Block</Text>
+                    <Text style={styles.menuItemText}>Block User</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -377,6 +414,7 @@ export default function App() {
             </View>
             <Text style={styles.tagline}>COMMUNICATE • ADAPT • CONNECT</Text>
           </View>
+
           <View style={styles.stableBadge}>
             <View style={styles.stableDot} />
             <Text style={styles.stableText}>STABLE</Text>
@@ -410,40 +448,18 @@ export default function App() {
         />
       )}
 
-      {activeTab === 'Profile' && (
+      {(activeTab === 'Profile' || activeTab === 'Queue' || activeTab === 'Connect') && (
         <View style={styles.centerContainer}>
-          <Text style={styles.screenTitle}>PROFILE</Text>
-          <Text style={styles.screenSub}>Zwelibanzi • Johannesburg</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>USER ID</Text>
-            <Text style={styles.infoValue}>VYB-001</Text>
-          </View>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>STATUS</Text>
-            <Text style={styles.infoValue}>Active</Text>
-          </View>
-        </View>
-      )}
-
-      {activeTab === 'Queue' && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.screenTitle}>MESSAGE QUEUE</Text>
-          <Text style={styles.screenSub}>All delivered</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>DELIVERED</Text>
-            <Text style={styles.infoValue}>{Object.values(messagesByChat).reduce((sum, msgs) => sum + msgs.length, 0)}</Text>
-          </View>
-        </View>
-      )}
-
-      {activeTab === 'Connect' && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.screenTitle}>NETWORK</Text>
-          <Text style={styles.screenSub}>Active</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>CONNECTION</Text>
-            <Text style={styles.infoValue}>Secure</Text>
-          </View>
+          <Text style={styles.screenTitle}>
+            {activeTab === 'Profile' ? 'PROFILE' : activeTab === 'Queue' ? 'MESSAGE QUEUE' : 'NETWORK STATUS'}
+          </Text>
+          <Text style={styles.screenSub}>
+            {activeTab === 'Profile'
+              ? 'Zwelibanzi • Johannesburg, South Africa'
+              : activeTab === 'Queue'
+              ? 'All messages delivered successfully.'
+              : 'Low-bandwidth communication active'}
+          </Text>
         </View>
       )}
 
@@ -454,12 +470,19 @@ export default function App() {
 
 function BottomTabs({ activeTab, setActiveTab }) {
   const tabs = ['Chats', 'Queue', 'Connect', 'Profile'];
+
   return (
     <View style={styles.tabBar}>
       {tabs.map(tab => (
-        <TouchableOpacity key={tab} style={styles.tabButton} onPress={() => setActiveTab(tab)}>
+        <TouchableOpacity
+          key={tab}
+          style={styles.tabButton}
+          onPress={() => setActiveTab(tab)}
+        >
           <View style={{ alignItems: 'center' }}>
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTab]}>{tab}</Text>
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTab]}>
+              {tab}
+            </Text>
             {activeTab === tab && <View style={styles.activeLine} />}
           </View>
         </TouchableOpacity>
@@ -469,71 +492,376 @@ function BottomTabs({ activeTab, setActiveTab }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 20, marginBottom: 24 },
-  logoRow: { flexDirection: 'row', alignItems: 'center' },
-  logoBox: { width: 42, height: 42, borderRadius: 12, backgroundColor: COLORS.accent, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  logoV: { color: '#FFF', fontSize: 22, fontWeight: 'bold' },
-  logo: { color: '#FFF', fontSize: 24, letterSpacing: 6, fontWeight: 'bold' },
-  tagline: { color: COLORS.muted, fontSize: 8, letterSpacing: 2, marginTop: 10 },
-  stableBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.card, borderRadius: 30, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: 16, paddingVertical: 10 },
-  stableDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#DDD', marginRight: 10 },
-  stableText: { color: '#FFF', fontSize: 11, letterSpacing: 2 },
-  chatCard: { backgroundColor: COLORS.card, borderRadius: 28, padding: 18, marginBottom: 18, borderWidth: 1, borderColor: COLORS.border },
-  chatRow: { flexDirection: 'row', alignItems: 'center' },
-  avatarWrapper: { marginRight: 16 },
-  avatar: { width: 58, height: 58, borderRadius: 29, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' },
-  avatarText: { color: '#FFF', fontSize: 18 },
-  onlineDot: { width: 12, height: 12, borderRadius: 6, position: 'absolute', right: 0, bottom: 2, borderWidth: 2, borderColor: COLORS.card },
-  chatTitle: { color: '#FFF', fontSize: 16, marginBottom: 6 },
-  chatMessage: { color: COLORS.muted, fontSize: 12, marginBottom: 10 },
-  chatTime: { color: COLORS.muted, fontSize: 10 },
-  tick: { color: COLORS.blue, fontSize: 8, letterSpacing: -2 },
-  chatHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
-  backButton: { color: COLORS.accent, fontSize: 28, marginRight: 18 },
-  chatProfile: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  chatName: { color: '#FFF', fontSize: 16, marginBottom: 4 },
-  onlineText: { color: COLORS.success, fontSize: 10 },
-  menu: { color: COLORS.accent, fontSize: 22 },
-  menuContainer: { backgroundColor: COLORS.card, borderRadius: 12, marginHorizontal: 20, marginBottom: 12, borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden' },
-  menuItem: { paddingVertical: 14, paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  menuItemText: { color: '#FFF', fontSize: 14 },
-  todayRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
-  line: { flex: 1, height: 1, backgroundColor: COLORS.border },
-  todayText: { color: COLORS.muted, fontSize: 10, marginHorizontal: 14, letterSpacing: 2 },
-  messageRow: { flexDirection: 'row', marginBottom: 18, alignItems: 'flex-end' },
-  myRow: { justifyContent: 'flex-end' },
-  theirRow: { justifyContent: 'flex-start' },
-  smallAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
-  smallAvatarText: { color: '#FFF', fontSize: 14 },
-  messageBubble: { maxWidth: '76%', padding: 18, borderRadius: 24, borderWidth: 1 },
-  theirBubble: { backgroundColor: COLORS.card, borderColor: COLORS.border },
-  myBubble: { backgroundColor: '#1A040A', borderColor: '#340814' },
-  messageText: { color: '#FFF', fontSize: 13, lineHeight: 20 },
-  messageFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
-  messageTime: { color: COLORS.muted, fontSize: 9 },
-  inputContainer: { flexDirection: 'row', paddingHorizontal: 20, paddingBottom: 20, paddingTop: 10 },
-  input: { flex: 1, backgroundColor: COLORS.card, borderRadius: 24, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: 20, paddingVertical: 16, color: '#FFF', fontSize: 13, marginRight: 12 },
-  sendButton: { backgroundColor: COLORS.card, borderRadius: 22, borderWidth: 1, borderColor: COLORS.border, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 14 },
-  sendText: { color: COLORS.accent, fontSize: 12, fontWeight: 'bold' },
-  profileContainer: { flex: 1, paddingHorizontal: 24, paddingTop: 20, alignItems: 'center' },
-  profileBack: { alignSelf: 'flex-start', marginBottom: 30 },
-  profileAvatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: COLORS.card, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, marginBottom: 24 },
-  profileAvatarText: { color: '#FFF', fontSize: 36, fontWeight: 'bold' },
-  profileName: { color: '#FFF', fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  profileStatus: { color: COLORS.success, fontSize: 12, marginBottom: 30 },
-  profileCard: { width: '100%', backgroundColor: COLORS.card, borderRadius: 16, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: COLORS.border },
-  profileLabel: { color: COLORS.muted, fontSize: 10, letterSpacing: 2, marginBottom: 8 },
-  profileValue: { color: '#FFF', fontSize: 14 },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
-  screenTitle: { color: '#FFF', fontSize: 28, fontWeight: 'bold', letterSpacing: 2, marginBottom: 12 },
-  screenSub: { color: COLORS.muted, fontSize: 14, marginBottom: 40, textAlign: 'center' },
-  infoCard: { width: '100%', backgroundColor: COLORS.card, borderRadius: 16, padding: 18, marginBottom: 16, borderWidth: 1, borderColor: COLORS.border },
-  infoLabel: { color: COLORS.muted, fontSize: 10, letterSpacing: 2, marginBottom: 8 },
-  infoValue: { color: '#FFF', fontSize: 16, fontWeight: '600' },
-  tabBar: { flexDirection: 'row', backgroundColor: COLORS.card, borderTopWidth: 1, borderTopColor: COLORS.border, paddingBottom: 10 },
-  tabButton: { flex: 1, alignItems: 'center', paddingTop: 12 },
-  tabText: { color: COLORS.muted, fontSize: 11, letterSpacing: 1, fontWeight: '600' },
-  activeTab: { color: COLORS.accent },
-  activeLine: { width: 40, height: 2, backgroundColor: COLORS.accent, marginTop: 8, borderRadius: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    marginBottom: 24,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: COLORS.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  logoV: {
+    color: '#FFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  logo: {
+    color: '#FFF',
+    fontSize: 24,
+    letterSpacing: 6,
+    fontWeight: 'bold',
+  },
+  tagline: {
+    color: COLORS.muted,
+    fontSize: 8,
+    letterSpacing: 2,
+    marginTop: 10,
+  },
+  stableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  stableDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#DDD',
+    marginRight: 10,
+  },
+  stableText: {
+    color: '#FFF',
+    fontSize: 11,
+    letterSpacing: 2,
+  },
+  chatCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 28,
+    padding: 18,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  chatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarWrapper: {
+    marginRight: 16,
+  },
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#111',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#FFF',
+    fontSize: 18,
+  },
+  onlineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    position: 'absolute',
+    right: 0,
+    bottom: 2,
+    borderWidth: 2,
+    borderColor: COLORS.card,
+  },
+  chatTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  chatMessage: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  chatTime: {
+    color: COLORS.muted,
+    fontSize: 10,
+  },
+  tick: {
+    color: COLORS.blue,
+    fontSize: 8,
+    letterSpacing: -2,
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  backButton: {
+    color: COLORS.accent,
+    fontSize: 28,
+    marginRight: 18,
+  },
+  chatProfile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  chatName: {
+    color: '#FFF',
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  onlineText: {
+    color: COLORS.success,
+    fontSize: 10,
+  },
+  menu: {
+    color: COLORS.accent,
+    fontSize: 22,
+  },
+  menuContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  menuItemText: {
+    color: '#FFF',
+    fontSize: 14,
+  },
+  todayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  todayText: {
+    color: COLORS.muted,
+    fontSize: 10,
+    marginHorizontal: 14,
+    letterSpacing: 2,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    marginBottom: 18,
+    alignItems: 'flex-end',
+  },
+  myRow: {
+    justifyContent: 'flex-end',
+  },
+  theirRow: {
+    justifyContent: 'flex-start',
+  },
+  smallAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#111',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  smallAvatarText: {
+    color: '#FFF',
+    fontSize: 14,
+  },
+  messageBubble: {
+    maxWidth: '76%',
+    padding: 18,
+    borderRadius: 24,
+    borderWidth: 1,
+  },
+  theirBubble: {
+    backgroundColor: COLORS.card,
+    borderColor: COLORS.border,
+  },
+  myBubble: {
+    backgroundColor: '#1A040A',
+    borderColor: '#340814',
+  },
+  messageText: {
+    color: '#FFF',
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  messageFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 14,
+  },
+  messageTime: {
+    color: COLORS.muted,
+    fontSize: 9,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 10,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    color: '#FFF',
+    fontSize: 13,
+    marginRight: 12,
+  },
+  sendButton: {
+    backgroundColor: COLORS.card,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+  },
+  sendText: {
+    color: COLORS.accent,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  profileContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    alignItems: 'center',
+  },
+  profileBack: {
+    alignSelf: 'flex-start',
+    marginBottom: 30,
+  },
+  profileAvatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: COLORS.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 20,
+  },
+  profileAvatarText: {
+    color: '#FFF',
+    fontSize: 36,
+    fontWeight: 'bold',
+  },
+  profileName: {
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  profileStatus: {
+    color: COLORS.success,
+    fontSize: 12,
+    marginBottom: 30,
+  },
+  profileCard: {
+    width: '100%',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  profileLabel: {
+    color: COLORS.muted,
+    fontSize: 10,
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  profileValue: {
+    color: '#FFF',
+    fontSize: 14,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  screenTitle: {
+    color: '#FFF',
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+    marginBottom: 12,
+  },
+  screenSub: {
+    color: COLORS.muted,
+    fontSize: 14,
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.card,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingBottom: 10,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 12,
+  },
+  tabText: {
+    color: COLORS.muted,
+    fontSize: 11,
+    letterSpacing: 1,
+    fontWeight: '600',
+  },
+  activeTab: {
+    color: COLORS.accent,
+  },
+  activeLine: {
+    width: 40,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    marginTop: 8,
+    borderRadius: 1,
+  },
 });
